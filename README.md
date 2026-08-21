@@ -18,3 +18,16 @@ Finally, there is the Device Info app which gives Battery data and WiFi status.
 
 ### Future Plans
 I have plans on making the code more "modular". Instead of having them all on main.py, I want to move to having flighttracker.py, clock.py and device-info.py and depending on which you upload to your device, it will run those apps automatically.
+
+# Requirements
+
+### Hardware Required
+- If you have a Smart Motor
+  - USB-C Cable
+
+- If no Smart Motor
+  - [Parts to Build a Smart Motor](https://smartmotors.ai/resources/build-instructions-landing-page/)
+  - USB-C Cable
+
+### Software Required
+- [Thonny](https://thonny.org/)
