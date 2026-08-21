@@ -1,7 +1,9 @@
 # Made by FlyingCoco-Offical as the offical launcher for SmartMotor-OS. For any issues make a Github issue.
+
 # --- SYSTEM CONFIGURATION ---
 WIFI_SSID = "YOUR_WIFI_NAME_HERE"
 WIFI_PASS = "YOUR_WIFI_PASS_HERE"
+OS_VERSION = "SMOS v1.0" # DO NOT EDIT
 
 import network
 import time
@@ -28,6 +30,7 @@ batt_adc.atten(ADC.ATTN_11DB)
 i2c = I2C(0, scl=Pin(7), sda=Pin(6))
 display = ssd1306.SSD1306_I2C(128, 64, i2c)
 
+# --- HARDWARE HELPERS ---
 def is_pressed(btn_pin):
     return btn_pin.value() == 0
 
@@ -93,8 +96,67 @@ SYS_CTX = {
 
 ensure_wifi()
 
-# --- DYNAMICALLY DISCOVER & LOAD APPS ---
-active_apps = []
+# --- BUILT-IN SYSTEM INFO APP ---
+class BuiltinSysInfo:
+    APP_NAME = "System Info"
+    
+    @staticmethod
+    def run(sys):
+        wlan = network.WLAN(network.STA_IF)
+        scroll_pos = 0
+        last_step_ms = time.ticks_ms()
+        is_paused = True
+        max_len = 16
+        
+        while True:
+            if sys["check_exit"](): return
+
+            now = time.ticks_ms()
+            wifi_ssid = sys["wifi_ssid"]
+            
+            if wifi_ssid == "YOUR_WIFI_NAME":
+                wifi_line = "WiFi: Off | Not Set"
+            elif wlan.isconnected():
+                wifi_line = f"WiFi: On | {wifi_ssid}"
+            else:
+                wifi_line = f"WiFi: Off | {wifi_ssid}"
+
+            volts, pct, is_charging, batt_text = sys["get_battery"]()
+
+            if len(wifi_line) > max_len:
+                padded = wifi_line + "   "
+                double_text = padded + padded
+                
+                if is_paused:
+                    if time.ticks_diff(now, last_step_ms) > 1500:
+                        is_paused = False
+                        last_step_ms = now
+                else:
+                    if time.ticks_diff(now, last_step_ms) > 250:
+                        scroll_pos += 1
+                        last_step_ms = now
+                        if scroll_pos >= len(padded):
+                            scroll_pos = 0
+                            is_paused = True
+
+                wifi_display_text = double_text[scroll_pos : scroll_pos + max_len]
+            else:
+                wifi_display_text = wifi_line
+
+            sys["display"].fill(0)
+            sys["display"].text("SYSTEM INFO", 12, 0)
+            sys["display"].hline(0, 10, 128, 1)
+            sys["display"].text(f"OS: {OS_VERSION}", 0, 15)
+            sys["display"].text(batt_text, 0, 28)
+            sys["display"].text(wifi_display_text, 0, 40)
+            sys["display"].hline(0, 52, 128, 1)
+            sys["display"].text("[Hold BigBtn Exit]", 0, 55)
+            sys["display"].show()
+            
+            time.sleep(0.02)
+
+# --- DYNAMICALLY DISCOVER & LOAD EXTERNAL APPS ---
+external_apps = []
 
 try:
     file_list = os.listdir()
@@ -107,12 +169,17 @@ for filename in file_list:
         try:
             mod = __import__(mod_name)
             if getattr(mod, "ENABLE_APP", False):
-                active_apps.append(mod)
+                external_apps.append(mod)
         except Exception as e:
             print(f"Failed to load {mod_name}: {e}")
 
-active_apps.sort(key=lambda x: (getattr(x, "APP_ORDER", 999), getattr(x, "APP_NAME", "")))
+# Sort external apps by order preference or name
+external_apps.sort(key=lambda x: (getattr(x, "APP_ORDER", 999), getattr(x, "APP_NAME", "")))
 
+# Always append System Info as the final entry in active_apps
+active_apps = external_apps + [BuiltinSysInfo]
+
+# --- HOME MENU LOOP ---
 selected_idx = 0
 last_idx = -1
 scroll_pos = 0
@@ -168,13 +235,6 @@ def draw_menu(selected_idx):
     display.show()
 
 while True:
-    if not active_apps:
-        display.fill(0)
-        display.text("No Apps Enabled!", 0, 20)
-        display.show()
-        time.sleep(1)
-        continue
-
     draw_menu(selected_idx)
 
     if is_k1_pressed():
