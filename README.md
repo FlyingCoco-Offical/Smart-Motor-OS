@@ -19,6 +19,8 @@ Finally, there is the Device Info app which gives Battery data and WiFi status.
 ### Future Plans
 I have plans on making the code more "modular". Instead of having them all on main.py, I want to move to having flighttracker.py, clock.py and device-info.py and depending on which you upload to your device, it will run those apps automatically.
 
+<hr style="border-top: 1px dotted #bbb;" />
+
 # Requirements
 
 ### Hardware Required
