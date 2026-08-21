@@ -150,7 +150,7 @@ class BuiltinSysInfo:
             sys["display"].text(batt_text, 0, 28)
             sys["display"].text(wifi_display_text, 0, 40)
             sys["display"].hline(0, 52, 128, 1)
-            sys["display"].text("[Hold BigBtn Exit]", 0, 55)
+            sys["display"].text("Hold BigBtn Exit", 0, 55)
             sys["display"].show()
             
             time.sleep(0.02)
