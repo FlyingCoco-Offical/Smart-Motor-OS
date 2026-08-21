@@ -5,7 +5,8 @@ ENABLE_APP = True
 APP_ORDER = 1  # 1 shows first, 2 shows second, etc.
 
 # Mode: "AIRPORT" or "MANUAL"
-TRACK_MODE = "AIRPORT"
+TRACK_MODE = "AIRPORT" # Manual is recommended at at the moment: Airport is having issues - Known Bug
+
 AIRPORT_CODE = "KLAX"
 
 MANUAL_LAT, MANUAL_LON = 34.2068, -118.2000
