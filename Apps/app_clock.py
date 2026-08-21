@@ -2,7 +2,7 @@
 
 # --- APP CONFIGURATION ---
 ENABLE_APP = True
-APP_ORDER = 2  # 1 shows first, 2 shows second, etc.
+APP_ORDER = 3  # 1 shows first, 2 shows second, etc.
 
 USE_24HR_TIME = False
 EUROPEAN_DATE_FORMAT = False
